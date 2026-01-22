@@ -1,0 +1,18 @@
+Summary
+
+CPT codes are owned by the AMA (American Medical Association) — they are copyrighted intellectual property.
+
+You cannot legally copy, store, or distribute CPT codes (even if you find them online) without a license.
+
+If you do, you could face copyright infringement or legal penalties from the AMA.
+
+Optum (and a few other companies) are authorized resellers or data partners.
+
+You can legally use CPT codes in your system if you license them through Optum or directly from the AMA.
+
+Optum also offers extra tools (like ICD-10 codes, APIs, and regular updates).
+
+⚖️ Bottom Line
+
+❌ No, you can’t just copy or scrape CPT codes from the internet.
+✅ Yes, you must get a license — either from the AMA or through a provider like Optum — before using them in your EHR system.

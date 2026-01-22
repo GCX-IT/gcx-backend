@@ -1,0 +1,5 @@
+wordpress
+
+test
+user : admin
+password: Test123@#_)(

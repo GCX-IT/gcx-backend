@@ -30,7 +30,7 @@ type MarketData struct {
 type CommodityInfo struct {
 	ID            uint           `json:"id" gorm:"primaryKey"`
 	Name          string         `json:"name" gorm:"not null"`
-	Code          string         `json:"code" gorm:"uniqueIndex;not null"` // MAIZE, SOYBEAN
+	Code          string         `json:"code" gorm:"type:varchar(191);uniqueIndex;not null"` // MAIZE, SOYBEAN
 	Description   string         `json:"description" gorm:"type:text"`
 	Specifications datatypes.JSON `json:"specifications" gorm:"type:json"`
 	TradingInfo   datatypes.JSON `json:"trading_info" gorm:"type:json"`

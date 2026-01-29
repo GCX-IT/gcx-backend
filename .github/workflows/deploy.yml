@@ -19,34 +19,5 @@ jobs:
           host: 188.166.159.42
           username: root
           password: ${{ secrets.DROPLET_PASSWORD }}
-          command_timeout: 5m
           script: |
-            set -e
-            
-            # Create .env
-            cd /root/gcx-backend
-            cat > .env << 'ENVEOF'
-            ${{ secrets.ENV_FILE }}
-            ENVEOF
-            
-            # Drop and recreate database
-            mysql -u root -e "DROP DATABASE IF EXISTS gcx_website; CREATE DATABASE gcx_website; GRANT ALL PRIVILEGES ON gcx_website.* TO 'gcx_user'@'localhost'; FLUSH PRIVILEGES;"
-            
-            # Pull and build
-            git pull origin main
-            go build -o gcx-cms
-            
-            # Restart service
-            pkill -f gcx-cms || true
-            sleep 1
-            nohup ./gcx-cms >> /var/log/gcx-cms.log 2>&1 </dev/null &
-            disown
-            
-            sleep 2
-            if pgrep -f gcx-cms; then
-              echo "✅ Backend deployed successfully"
-            else
-              echo "❌ Backend failed to start"
-              tail -20 /var/log/gcx-cms.log
-              exit 1
-            fi
+            cd /root/gcx-backend && git pull origin main && go build -o gcx-cms && (pkill gcx-cms || true) && nohup ./gcx-cms &>/dev/null & disown

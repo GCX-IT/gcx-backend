@@ -6,7 +6,7 @@ import "time"
 type Commodity struct {
 	ID                  uint      `json:"id" gorm:"primaryKey"`
 	Name                string    `json:"name" gorm:"not null"`
-	Code                string    `json:"code" gorm:"uniqueIndex;not null"`
+	Code                string    `json:"code" gorm:"type:varchar(191);uniqueIndex;not null"`
 	Description         string    `json:"description" gorm:"type:text"`
 	FullDescription     string    `json:"full_description" gorm:"type:text"`
 	Specifications      string    `json:"specifications" gorm:"type:text"`

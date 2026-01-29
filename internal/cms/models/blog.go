@@ -20,7 +20,7 @@ const (
 type BlogPost struct {
 	ID            uint           `json:"id" gorm:"primaryKey"`
 	Title         string         `json:"title" gorm:"not null"`
-	Slug          string         `json:"slug" gorm:"uniqueIndex;not null"`
+	Slug          string         `json:"slug" gorm:"type:varchar(191);uniqueIndex;not null"`
 	Content       string         `json:"content" gorm:"type:longtext"`
 	Excerpt       string         `json:"excerpt" gorm:"type:text"`
 	FeaturedImage *string        `json:"featured_image"`

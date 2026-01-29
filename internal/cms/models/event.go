@@ -29,7 +29,7 @@ const (
 type Event struct {
 	ID                   uint           `json:"id" gorm:"primaryKey"`
 	Title                string         `json:"title" gorm:"not null"`
-	Slug                 string         `json:"slug" gorm:"uniqueIndex;not null"`
+	Slug                 string         `json:"slug" gorm:"type:varchar(191);uniqueIndex;not null"`
 	Date                 time.Time      `json:"date" gorm:"not null"`
 	Time                 *string        `json:"time"`
 	Location             string         `json:"location" gorm:"not null"`

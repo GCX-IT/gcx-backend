@@ -52,7 +52,7 @@ type NewsItem struct {
 type NewsCategory struct {
 	ID          uint      `json:"id" gorm:"primaryKey"`
 	Name        string    `json:"name" gorm:"not null"`
-	Slug        string    `json:"slug" gorm:"uniqueIndex;not null"`
+	Slug        string    `json:"slug" gorm:"type:varchar(191);uniqueIndex;not null"`
 	Description *string   `json:"description"`
 	Color       *string   `json:"color"`
 	IsActive    bool      `json:"is_active" gorm:"default:true"`

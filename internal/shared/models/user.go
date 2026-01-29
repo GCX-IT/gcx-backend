@@ -19,7 +19,7 @@ const (
 type User struct {
 	ID        uint      `json:"id" gorm:"primaryKey"`
 	Name      string    `json:"name" gorm:"not null"`
-	Email     string    `json:"email" gorm:"uniqueIndex;not null"`
+	Email     string    `json:"email" gorm:"type:varchar(191);uniqueIndex;not null"`
 	Password  string    `json:"-" gorm:"not null"` // Hidden from JSON
 	Role      UserRole  `json:"role" gorm:"default:user"`
 	Avatar    *string   `json:"avatar"`

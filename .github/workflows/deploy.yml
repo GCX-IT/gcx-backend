@@ -13,13 +13,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       
-      - name: Test SSH Connection
+      - name: Deploy to DigitalOcean Droplet
         uses: appleboy/ssh-action@master
+        env:
+          ENV_CONTENT: ${{ secrets.ENV_FILE }}
         with:
           host: 188.166.159.42
           username: root
           password: ${{ secrets.DROPLET_PASSWORD }}
+          envs: ENV_CONTENT
           script: |
-            echo "SSH connection successful!"
-            pwd
-            ls -la /root/gcx-backend
+            # Create .env file from secret
+            echo "$ENV_CONTENT" > /root/gcx-backend/.env
+            
+            cd /root/gcx-backend
+            git pull origin main
+            go mod tidy
+            go build -o gcx-cms
+            
+            # Kill old process if running
+            pkill -f gcx-cms || true
+            
+            # Start the new process in background
+            nohup ./gcx-cms > /var/log/gcx-cms.log 2>&1 &
+            
+            echo "Deployment complete!"

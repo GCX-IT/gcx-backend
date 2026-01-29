@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"gcx-cms/internal/cms/models"
+	"gcx-cms/internal/shared/database"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gosimple/slug"
@@ -15,7 +16,7 @@ import (
 
 // GetGalleries retrieves all active galleries (public endpoint)
 func GetGalleries(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	category := c.Query("category")
 	featured := c.Query("featured")
 
@@ -40,7 +41,7 @@ func GetGalleries(c *gin.Context) {
 
 // GetGallery retrieves a single gallery with photos (public endpoint)
 func GetGallery(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var gallery models.PhotoGallery
@@ -62,7 +63,7 @@ func GetGallery(c *gin.Context) {
 
 // GetGalleryBySlug retrieves a gallery by slug (public endpoint)
 func GetGalleryBySlug(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	gallerySlug := c.Param("slug")
 
 	var gallery models.PhotoGallery
@@ -84,7 +85,7 @@ func GetGalleryBySlug(c *gin.Context) {
 
 // GetAllGalleries retrieves all galleries for CMS (protected endpoint)
 func GetAllGalleries(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var galleries []models.PhotoGallery
 	if err := db.Order("created_at DESC").Find(&galleries).Error; err != nil {
@@ -97,7 +98,7 @@ func GetAllGalleries(c *gin.Context) {
 
 // CreateGallery creates a new photo gallery (protected endpoint)
 func CreateGallery(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var gallery models.PhotoGallery
 	if err := c.ShouldBindJSON(&gallery); err != nil {
@@ -136,7 +137,7 @@ func CreateGallery(c *gin.Context) {
 
 // UpdateGallery updates an existing gallery (protected endpoint)
 func UpdateGallery(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var gallery models.PhotoGallery
@@ -168,7 +169,7 @@ func UpdateGallery(c *gin.Context) {
 
 // DeleteGallery deletes a gallery (soft delete) (protected endpoint)
 func DeleteGallery(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var gallery models.PhotoGallery
@@ -191,7 +192,7 @@ func DeleteGallery(c *gin.Context) {
 
 // AddPhotoToGallery adds a photo to a gallery (protected endpoint)
 func AddPhotoToGallery(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	galleryID := c.Param("id")
 
 	var photo models.GalleryPhoto
@@ -223,7 +224,7 @@ func AddPhotoToGallery(c *gin.Context) {
 
 // UpdateGalleryPhoto updates a photo (protected endpoint)
 func UpdateGalleryPhoto(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var photo models.GalleryPhoto
@@ -255,7 +256,7 @@ func UpdateGalleryPhoto(c *gin.Context) {
 
 // DeleteGalleryPhoto deletes a photo (soft delete) (protected endpoint)
 func DeleteGalleryPhoto(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var photo models.GalleryPhoto
@@ -278,7 +279,7 @@ func DeleteGalleryPhoto(c *gin.Context) {
 
 // GetGalleryPhotos retrieves all photos in a gallery (public endpoint)
 func GetGalleryPhotos(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	galleryID := c.Param("id")
 
 	var photos []models.GalleryPhoto

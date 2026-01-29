@@ -4,14 +4,14 @@ import (
 	"net/http"
 
 	"gcx-cms/internal/cms/models"
+	"gcx-cms/internal/shared/database"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // GetAllCommodityContractTypes retrieves all contract types for a commodity
 func GetAllCommodityContractTypes(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	commodityID := c.Param("commodityId")
 
 	var contractTypes []models.CommodityContractType
@@ -33,7 +33,7 @@ func GetAllCommodityContractTypes(c *gin.Context) {
 
 // GetCommodityContractType retrieves a single contract type by ID
 func GetCommodityContractType(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var contractType models.CommodityContractType
@@ -53,7 +53,7 @@ func GetCommodityContractType(c *gin.Context) {
 
 // CreateCommodityContractType creates a new contract type
 func CreateCommodityContractType(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var contractType models.CommodityContractType
 	if err := c.ShouldBindJSON(&contractType); err != nil {
@@ -80,7 +80,7 @@ func CreateCommodityContractType(c *gin.Context) {
 
 // UpdateCommodityContractType updates an existing contract type
 func UpdateCommodityContractType(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var contractType models.CommodityContractType
@@ -116,7 +116,7 @@ func UpdateCommodityContractType(c *gin.Context) {
 
 // DeleteCommodityContractType deletes a contract type
 func DeleteCommodityContractType(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var contractType models.CommodityContractType
@@ -144,7 +144,7 @@ func DeleteCommodityContractType(c *gin.Context) {
 
 // GetCommoditiesWithContractTypes retrieves all commodities with their contract types
 func GetCommoditiesWithContractTypes(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var commodities []models.Commodity
 	if err := db.Preload("ContractTypes", "is_active = ?", true).
@@ -165,7 +165,7 @@ func GetCommoditiesWithContractTypes(c *gin.Context) {
 
 // UpdateContractTypeSortOrder updates the sort order of contract types
 func UpdateContractTypeSortOrder(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	type SortOrderUpdate struct {
 		ID        uint `json:"id" binding:"required"`

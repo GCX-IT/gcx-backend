@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"gcx-cms/internal/services"
+	"gcx-cms/internal/shared/database"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // MediaFile represents a media file record for API responses
@@ -46,7 +46,7 @@ func (MediaFileRecord) TableName() string {
 
 // GetMedia returns all media files (protected)
 func GetMedia(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var mediaRecords []MediaFileRecord
 	if err := db.Where("deleted_at IS NULL").Order("created_at DESC").Find(&mediaRecords).Error; err != nil {
@@ -149,7 +149,7 @@ func UploadFile(c *gin.Context) {
 	}
 
 	// Save to database
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	mediaRecord := MediaFileRecord{
 		OriginalName: header.Filename,
 		Filename:     filename,
@@ -430,7 +430,7 @@ func DeleteMedia(c *gin.Context) {
 	}
 
 	// Get database connection
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	// Find the media record in database
 	var mediaRecord MediaFileRecord

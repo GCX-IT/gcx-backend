@@ -5,14 +5,14 @@ import (
 	"strconv"
 
 	"gcx-cms/internal/cms/models"
+	"gcx-cms/internal/shared/database"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // GetCommodities retrieves all commodities with pagination and search
 func GetCommodities(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	// Pagination parameters
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -70,7 +70,7 @@ func GetCommodities(c *gin.Context) {
 
 // GetCommodity retrieves a single commodity by ID
 func GetCommodity(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var commodity models.Commodity
@@ -90,7 +90,7 @@ func GetCommodity(c *gin.Context) {
 
 // CreateCommodity creates a new commodity
 func CreateCommodity(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var commodity models.Commodity
 	if err := c.ShouldBindJSON(&commodity); err != nil {
@@ -117,7 +117,7 @@ func CreateCommodity(c *gin.Context) {
 
 // UpdateCommodity updates an existing commodity
 func UpdateCommodity(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var commodity models.Commodity
@@ -153,7 +153,7 @@ func UpdateCommodity(c *gin.Context) {
 
 // DeleteCommodity deletes a commodity
 func DeleteCommodity(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	if err := db.Delete(&models.Commodity{}, id).Error; err != nil {

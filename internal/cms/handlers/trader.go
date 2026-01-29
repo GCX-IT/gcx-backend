@@ -5,14 +5,14 @@ import (
 	"strconv"
 
 	"gcx-cms/internal/cms/models"
+	"gcx-cms/internal/shared/database"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // GetTraders retrieves all traders with pagination and search
 func GetTraders(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	// Pagination parameters
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -58,7 +58,7 @@ func GetTraders(c *gin.Context) {
 
 // GetTrader retrieves a single trader by ID
 func GetTrader(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var trader models.Trader
@@ -78,7 +78,7 @@ func GetTrader(c *gin.Context) {
 
 // CreateTrader creates a new trader
 func CreateTrader(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var trader models.Trader
 	if err := c.ShouldBindJSON(&trader); err != nil {
@@ -105,7 +105,7 @@ func CreateTrader(c *gin.Context) {
 
 // UpdateTrader updates an existing trader
 func UpdateTrader(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var trader models.Trader
@@ -141,7 +141,7 @@ func UpdateTrader(c *gin.Context) {
 
 // DeleteTrader deletes a trader
 func DeleteTrader(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	if err := db.Delete(&models.Trader{}, id).Error; err != nil {

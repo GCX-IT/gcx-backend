@@ -6,9 +6,9 @@ import (
 
 	"gcx-cms/internal/models"
 	"gcx-cms/internal/services"
+	"gcx-cms/internal/shared/database"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // CreatePartner creates a new partner
@@ -19,7 +19,7 @@ func CreatePartner(c *gin.Context) {
 		return
 	}
 
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	partnerService := services.NewPartnerService(db)
 	if err := partnerService.CreatePartner(&partner); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "Failed to create partner"})
@@ -37,7 +37,7 @@ func GetPartner(c *gin.Context) {
 		return
 	}
 
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	partnerService := services.NewPartnerService(db)
 	partner, err := partnerService.GetPartnerByID(uint(id))
 	if err != nil {
@@ -56,7 +56,7 @@ func GetAllPartners(c *gin.Context) {
 	category := c.Query("category")
 	status := c.Query("status")
 
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	partnerService := services.NewPartnerService(db)
 	partners, total, err := partnerService.GetAllPartners(page, limit, search, category, status)
 	if err != nil {
@@ -92,7 +92,7 @@ func UpdatePartner(c *gin.Context) {
 		return
 	}
 
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	partnerService := services.NewPartnerService(db)
 	if err := partnerService.UpdatePartner(uint(id), &partner); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "Failed to update partner"})
@@ -110,7 +110,7 @@ func DeletePartner(c *gin.Context) {
 		return
 	}
 
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	partnerService := services.NewPartnerService(db)
 	if err := partnerService.DeletePartner(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "Failed to delete partner"})
@@ -128,7 +128,7 @@ func GetPartnersByCategory(c *gin.Context) {
 		return
 	}
 
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	partnerService := services.NewPartnerService(db)
 	partners, err := partnerService.GetPartnersByCategory(category)
 	if err != nil {
@@ -141,7 +141,7 @@ func GetPartnersByCategory(c *gin.Context) {
 
 // GetActivePartners retrieves all active partners
 func GetActivePartners(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	partnerService := services.NewPartnerService(db)
 	partners, err := partnerService.GetActivePartners()
 	if err != nil {

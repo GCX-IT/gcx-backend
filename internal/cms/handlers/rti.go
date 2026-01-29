@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"gcx-cms/internal/cms/models"
+	"gcx-cms/internal/shared/database"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -12,7 +13,7 @@ import (
 
 // CreateRTIRequest creates a new RTI request (public endpoint)
 func CreateRTIRequest(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var request models.RTIRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -36,7 +37,7 @@ func CreateRTIRequest(c *gin.Context) {
 
 // GetAllRTIRequests retrieves all RTI requests for CMS (protected endpoint)
 func GetAllRTIRequests(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	// Parse query parameters
 	status := c.Query("status")
@@ -89,7 +90,7 @@ func GetAllRTIRequests(c *gin.Context) {
 
 // GetRTIRequest retrieves a single RTI request (protected endpoint)
 func GetRTIRequest(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var request models.RTIRequest
@@ -107,7 +108,7 @@ func GetRTIRequest(c *gin.Context) {
 
 // UpdateRTIRequest updates an RTI request (protected endpoint)
 func UpdateRTIRequest(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var request models.RTIRequest
@@ -139,7 +140,7 @@ func UpdateRTIRequest(c *gin.Context) {
 
 // RespondToRTIRequest adds a response to an RTI request (protected endpoint)
 func RespondToRTIRequest(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var request models.RTIRequest
@@ -180,7 +181,7 @@ func RespondToRTIRequest(c *gin.Context) {
 
 // UpdateRTIStatus updates the status of an RTI request (protected endpoint)
 func UpdateRTIStatus(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var request models.RTIRequest
@@ -227,7 +228,7 @@ func UpdateRTIStatus(c *gin.Context) {
 
 // DeleteRTIRequest deletes an RTI request (soft delete) (protected endpoint)
 func DeleteRTIRequest(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var request models.RTIRequest
@@ -250,7 +251,7 @@ func DeleteRTIRequest(c *gin.Context) {
 
 // GetRTIStats retrieves statistics about RTI requests (protected endpoint)
 func GetRTIStats(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var totalRequests int64
 	var pendingRequests int64

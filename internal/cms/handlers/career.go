@@ -5,14 +5,14 @@ import (
 	"strconv"
 
 	"gcx-cms/internal/cms/models"
+	"gcx-cms/internal/shared/database"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // GetCareers retrieves all careers with pagination and search
 func GetCareers(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	// Pagination parameters
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -70,7 +70,7 @@ func GetCareers(c *gin.Context) {
 
 // GetCareer retrieves a single career by ID
 func GetCareer(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var career models.Career
@@ -90,7 +90,7 @@ func GetCareer(c *gin.Context) {
 
 // CreateCareer creates a new career
 func CreateCareer(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var career models.Career
 	if err := c.ShouldBindJSON(&career); err != nil {
@@ -117,7 +117,7 @@ func CreateCareer(c *gin.Context) {
 
 // UpdateCareer updates an existing career
 func UpdateCareer(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var career models.Career
@@ -165,7 +165,7 @@ func UpdateCareer(c *gin.Context) {
 
 // DeleteCareer deletes a career
 func DeleteCareer(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	if err := db.Delete(&models.Career{}, id).Error; err != nil {

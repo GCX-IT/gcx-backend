@@ -5,14 +5,14 @@ import (
 	"strconv"
 
 	"gcx-cms/internal/cms/models"
+	"gcx-cms/internal/shared/database"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // GetPublications retrieves all publications with pagination and search
 func GetPublications(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	// Pagination parameters
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -64,7 +64,7 @@ func GetPublications(c *gin.Context) {
 
 // GetPublication retrieves a single publication by ID
 func GetPublication(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var publication models.Publication
@@ -87,7 +87,7 @@ func GetPublication(c *gin.Context) {
 
 // CreatePublication creates a new publication
 func CreatePublication(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var publication models.Publication
 	if err := c.ShouldBindJSON(&publication); err != nil {
@@ -114,7 +114,7 @@ func CreatePublication(c *gin.Context) {
 
 // UpdatePublication updates an existing publication
 func UpdatePublication(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var publication models.Publication
@@ -150,7 +150,7 @@ func UpdatePublication(c *gin.Context) {
 
 // DeletePublication deletes a publication
 func DeletePublication(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	if err := db.Delete(&models.Publication{}, id).Error; err != nil {

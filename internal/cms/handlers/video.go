@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"gcx-cms/internal/cms/models"
+	"gcx-cms/internal/shared/database"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gosimple/slug"
@@ -15,7 +16,7 @@ import (
 
 // GetVideoLibraries retrieves all active video libraries (public endpoint)
 func GetVideoLibraries(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	category := c.Query("category")
 	featured := c.Query("featured")
 
@@ -40,7 +41,7 @@ func GetVideoLibraries(c *gin.Context) {
 
 // GetVideoLibrary retrieves a single video library with videos (public endpoint)
 func GetVideoLibrary(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var library models.VideoLibrary
@@ -62,7 +63,7 @@ func GetVideoLibrary(c *gin.Context) {
 
 // GetVideoLibraryBySlug retrieves a video library by slug (public endpoint)
 func GetVideoLibraryBySlug(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	librarySlug := c.Param("slug")
 
 	var library models.VideoLibrary
@@ -84,7 +85,7 @@ func GetVideoLibraryBySlug(c *gin.Context) {
 
 // GetAllVideoLibraries retrieves all video libraries for CMS (protected endpoint)
 func GetAllVideoLibraries(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var libraries []models.VideoLibrary
 	if err := db.Order("created_at DESC").Find(&libraries).Error; err != nil {
@@ -97,7 +98,7 @@ func GetAllVideoLibraries(c *gin.Context) {
 
 // CreateVideoLibrary creates a new video library (protected endpoint)
 func CreateVideoLibrary(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var library models.VideoLibrary
 	if err := c.ShouldBindJSON(&library); err != nil {
@@ -136,7 +137,7 @@ func CreateVideoLibrary(c *gin.Context) {
 
 // UpdateVideoLibrary updates an existing video library (protected endpoint)
 func UpdateVideoLibrary(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var library models.VideoLibrary
@@ -168,7 +169,7 @@ func UpdateVideoLibrary(c *gin.Context) {
 
 // DeleteVideoLibrary deletes a video library (soft delete) (protected endpoint)
 func DeleteVideoLibrary(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var library models.VideoLibrary
@@ -191,7 +192,7 @@ func DeleteVideoLibrary(c *gin.Context) {
 
 // AddVideoToLibrary adds a video to a library (protected endpoint)
 func AddVideoToLibrary(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	libraryID := c.Param("id")
 
 	var video models.LibraryVideo
@@ -223,7 +224,7 @@ func AddVideoToLibrary(c *gin.Context) {
 
 // UpdateLibraryVideo updates a video (protected endpoint)
 func UpdateLibraryVideo(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var video models.LibraryVideo
@@ -255,7 +256,7 @@ func UpdateLibraryVideo(c *gin.Context) {
 
 // DeleteLibraryVideo deletes a video (soft delete) (protected endpoint)
 func DeleteLibraryVideo(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var video models.LibraryVideo
@@ -278,7 +279,7 @@ func DeleteLibraryVideo(c *gin.Context) {
 
 // GetLibraryVideos retrieves all videos in a library (public endpoint)
 func GetLibraryVideos(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	libraryID := c.Param("id")
 
 	var videos []models.LibraryVideo
@@ -294,7 +295,7 @@ func GetLibraryVideos(c *gin.Context) {
 
 // TrackVideoView increments view count for a video (public endpoint)
 func TrackVideoView(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var video models.LibraryVideo

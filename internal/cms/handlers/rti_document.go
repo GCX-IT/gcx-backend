@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"gcx-cms/internal/cms/models"
+	"gcx-cms/internal/shared/database"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -11,7 +12,7 @@ import (
 
 // GetRTIDocuments retrieves all active RTI documents (public endpoint)
 func GetRTIDocuments(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	category := c.Query("category")
 
 	var documents []models.RTIDocument
@@ -31,7 +32,7 @@ func GetRTIDocuments(c *gin.Context) {
 
 // GetRTIDocument retrieves a single RTI document (public endpoint)
 func GetRTIDocument(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var document models.RTIDocument
@@ -49,7 +50,7 @@ func GetRTIDocument(c *gin.Context) {
 
 // DownloadRTIDocument handles document download and increments counter (public endpoint)
 func DownloadRTIDocument(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var document models.RTIDocument
@@ -73,7 +74,7 @@ func DownloadRTIDocument(c *gin.Context) {
 
 // GetAllRTIDocuments retrieves all RTI documents for CMS (protected endpoint)
 func GetAllRTIDocuments(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var documents []models.RTIDocument
 	if err := db.Order("sort_order ASC, created_at DESC").Find(&documents).Error; err != nil {
@@ -86,7 +87,7 @@ func GetAllRTIDocuments(c *gin.Context) {
 
 // CreateRTIDocument creates a new RTI document (protected endpoint)
 func CreateRTIDocument(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var document models.RTIDocument
 	if err := c.ShouldBindJSON(&document); err != nil {
@@ -107,7 +108,7 @@ func CreateRTIDocument(c *gin.Context) {
 
 // UpdateRTIDocument updates an existing RTI document (protected endpoint)
 func UpdateRTIDocument(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var document models.RTIDocument
@@ -139,7 +140,7 @@ func UpdateRTIDocument(c *gin.Context) {
 
 // DeleteRTIDocument deletes an RTI document (soft delete) (protected endpoint)
 func DeleteRTIDocument(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var document models.RTIDocument

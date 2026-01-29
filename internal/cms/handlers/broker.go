@@ -5,14 +5,14 @@ import (
 	"strconv"
 
 	"gcx-cms/internal/cms/models"
+	"gcx-cms/internal/shared/database"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // GetBrokers retrieves all brokers with pagination and search
 func GetBrokers(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	// Pagination parameters
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -58,7 +58,7 @@ func GetBrokers(c *gin.Context) {
 
 // GetBroker retrieves a single broker by ID
 func GetBroker(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var broker models.Broker
@@ -78,7 +78,7 @@ func GetBroker(c *gin.Context) {
 
 // CreateBroker creates a new broker
 func CreateBroker(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var broker models.Broker
 	if err := c.ShouldBindJSON(&broker); err != nil {
@@ -105,7 +105,7 @@ func CreateBroker(c *gin.Context) {
 
 // UpdateBroker updates an existing broker
 func UpdateBroker(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var broker models.Broker
@@ -141,7 +141,7 @@ func UpdateBroker(c *gin.Context) {
 
 // DeleteBroker deletes a broker
 func DeleteBroker(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	if err := db.Delete(&models.Broker{}, id).Error; err != nil {

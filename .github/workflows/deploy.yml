@@ -28,13 +28,27 @@ jobs:
             
             cd /root/gcx-backend
             git pull origin main
-            go mod tidy
-            go build -o gcx-cms
+            
+            # Build the app and check for errors
+            if ! go build -o gcx-cms; then
+              echo "Build failed!"
+              exit 1
+            fi
             
             # Kill old process if running
             pkill -f gcx-cms || true
+            sleep 1
             
-            # Start the new process in background
+            # Start the new process in background and capture output
             nohup ./gcx-cms > /var/log/gcx-cms.log 2>&1 &
+            sleep 2
             
-            echo "Deployment complete!"
+            # Check if process is running
+            if pgrep -f gcx-cms > /dev/null; then
+              echo "✅ Backend deployed successfully on port 8081"
+              tail -20 /var/log/gcx-cms.log
+            else
+              echo "❌ Backend failed to start"
+              tail -50 /var/log/gcx-cms.log
+              exit 1
+            fi

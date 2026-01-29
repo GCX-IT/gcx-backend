@@ -15,40 +15,44 @@ jobs:
       
       - name: Deploy to DigitalOcean Droplet
         uses: appleboy/ssh-action@master
-        env:
-          ENV_CONTENT: ${{ secrets.ENV_FILE }}
         with:
           host: 188.166.159.42
           username: root
           password: ${{ secrets.DROPLET_PASSWORD }}
-          envs: ENV_CONTENT
           script: |
-            # Create .env file from secret
-            echo "$ENV_CONTENT" > /root/gcx-backend/.env
+            # Recreate fresh database
+            mysql -u root << 'MYSQL_EOF'
+            DROP DATABASE IF EXISTS gcx_website;
+            CREATE DATABASE gcx_website;
+            GRANT ALL PRIVILEGES ON gcx_website.* TO 'gcx_user'@'localhost';
+            FLUSH PRIVILEGES;
+            MYSQL_EOF
             
+            # Pull latest code
             cd /root/gcx-backend
             git pull origin main
             
-            # Build the app and check for errors
-            if ! go build -o gcx-cms; then
-              echo "Build failed!"
-              exit 1
-            fi
+            # Build
+            go build -o gcx-cms
             
-            # Kill old process if running
+            # Kill old process
             pkill -f gcx-cms || true
             sleep 1
             
-            # Start the new process in background and capture output
+            # Create .env
+            cat > .env << 'ENV_EOF'
+            ${{ secrets.ENV_FILE }}
+            ENV_EOF
+            
+            # Start backend
             nohup ./gcx-cms > /var/log/gcx-cms.log 2>&1 &
             sleep 2
             
-            # Check if process is running
+            # Check status
             if pgrep -f gcx-cms > /dev/null; then
-              echo "✅ Backend deployed successfully on port 8081"
-              tail -20 /var/log/gcx-cms.log
+              echo "✅ Backend running on port 8081"
             else
-              echo "❌ Backend failed to start"
-              tail -50 /var/log/gcx-cms.log
+              echo "❌ Backend failed"
+              tail -20 /var/log/gcx-cms.log
               exit 1
             fi

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"gcx-cms/internal/cms/models"
+	"gcx-cms/internal/shared/database"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gosimple/slug"
@@ -15,7 +16,7 @@ import (
 
 // GetEvents retrieves all events (public endpoint)
 func GetEvents(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	// Parse query parameters
 	status := c.Query("status")     // upcoming, completed, cancelled
@@ -74,7 +75,7 @@ func GetEvents(c *gin.Context) {
 
 // GetEvent retrieves a single event by ID (public endpoint)
 func GetEvent(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var event models.Event
@@ -92,7 +93,7 @@ func GetEvent(c *gin.Context) {
 
 // GetEventBySlug retrieves a single event by slug (public endpoint)
 func GetEventBySlug(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	eventSlug := c.Param("slug")
 
 	var event models.Event
@@ -110,7 +111,7 @@ func GetEventBySlug(c *gin.Context) {
 
 // GetUpcomingEvents retrieves all upcoming events (public endpoint)
 func GetUpcomingEvents(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	limit := c.DefaultQuery("limit", "10")
 
 	var events []models.Event
@@ -129,7 +130,7 @@ func GetUpcomingEvents(c *gin.Context) {
 
 // GetPastEvents retrieves all past/completed events (public endpoint)
 func GetPastEvents(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	limit := c.DefaultQuery("limit", "10")
 
 	var events []models.Event
@@ -148,7 +149,7 @@ func GetPastEvents(c *gin.Context) {
 
 // GetAllEvents retrieves all events for CMS (protected endpoint)
 func GetAllEvents(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var events []models.Event
 	if err := db.Order("date DESC").Find(&events).Error; err != nil {
@@ -161,7 +162,7 @@ func GetAllEvents(c *gin.Context) {
 
 // CreateEvent creates a new event (protected endpoint)
 func CreateEvent(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var event models.Event
 	if err := c.ShouldBindJSON(&event); err != nil {
@@ -201,7 +202,7 @@ func CreateEvent(c *gin.Context) {
 
 // UpdateEvent updates an existing event (protected endpoint)
 func UpdateEvent(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var event models.Event
@@ -249,7 +250,7 @@ func UpdateEvent(c *gin.Context) {
 
 // DeleteEvent deletes an event (soft delete) (protected endpoint)
 func DeleteEvent(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	id := c.Param("id")
 
 	var event models.Event
@@ -272,7 +273,7 @@ func DeleteEvent(c *gin.Context) {
 
 // GetEventStats retrieves statistics about events (protected endpoint)
 func GetEventStats(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 
 	var totalEvents int64
 	var upcomingEvents int64
@@ -301,7 +302,7 @@ func GetEventStats(c *gin.Context) {
 
 // RegisterForEvent handles event registration (public endpoint)
 func RegisterForEvent(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	eventID := c.Param("id")
 
 	// Check if event exists and registration is open
@@ -356,7 +357,7 @@ func RegisterForEvent(c *gin.Context) {
 
 // GetEventRegistrations retrieves all registrations for an event (protected endpoint)
 func GetEventRegistrations(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	db := database.GetDB()
 	eventID := c.Param("id")
 
 	var registrations []models.EventRegistration

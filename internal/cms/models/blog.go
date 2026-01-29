@@ -39,7 +39,7 @@ type BlogPost struct {
 type BlogCategory struct {
 	ID          uint      `json:"id" gorm:"primaryKey"`
 	Name        string    `json:"name" gorm:"not null"`
-	Slug        string    `json:"slug" gorm:"uniqueIndex;not null"`
+	Slug        string    `json:"slug" gorm:"type:varchar(191);uniqueIndex;not null"`
 	Description *string   `json:"description"`
 	Color       *string   `json:"color"`
 	CreatedAt   time.Time `json:"created_at"`

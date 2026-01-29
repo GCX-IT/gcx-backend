@@ -28,7 +28,7 @@ const (
 // RTIRequest represents a Right to Information request
 type RTIRequest struct {
 	ID              uint           `json:"id" gorm:"primaryKey"`
-	RequestID       string         `json:"request_id" gorm:"uniqueIndex;not null"`
+	RequestID       string         `json:"request_id" gorm:"type:varchar(191);uniqueIndex;not null"`
 	FullName        string         `json:"full_name" gorm:"not null"`
 	Email           string         `json:"email" gorm:"not null"`
 	Phone           string         `json:"phone" gorm:"not null"`

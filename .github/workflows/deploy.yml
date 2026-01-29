@@ -20,4 +20,9 @@ jobs:
           username: root
           password: ${{ secrets.DROPLET_PASSWORD }}
           script: |
-            cd /root/gcx-backend && git pull origin main && go build -o gcx-cms && (pkill gcx-cms || true) && nohup ./gcx-cms &>/dev/null & disown
+            cd /root/gcx-backend
+            git pull origin main
+            go build -o gcx-cms
+            pkill gcx-cms || true
+            ./gcx-cms > /dev/null 2>&1 &
+            echo "Deployed"

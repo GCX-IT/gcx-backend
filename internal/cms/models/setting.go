@@ -10,7 +10,7 @@ import (
 // Setting represents a configuration setting for the CMS
 type Setting struct {
 	ID          uint           `json:"id" gorm:"primaryKey"`
-	Key         string         `json:"key" gorm:"uniqueIndex;not null;size:100" binding:"required"`
+	Key         string         `json:"key" gorm:"type:varchar(100);uniqueIndex;not null" binding:"required"`
 	Value       string         `json:"value" gorm:"type:text"`
 	Type        string         `json:"type" gorm:"size:50;default:'string'"` // string, number, boolean, json, text
 	Group       string         `json:"group" gorm:"size:50;index"`           // general, social, seo, etc.

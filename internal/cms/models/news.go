@@ -63,7 +63,7 @@ type NewsCategory struct {
 // NewsSourceConfig represents configuration for external news sources
 type NewsSourceConfig struct {
 	ID              uint       `json:"id" gorm:"primaryKey"`
-	SourceName      string     `json:"source_name" gorm:"not null;uniqueIndex"`
+	SourceName      string     `json:"source_name" gorm:"type:varchar(191);not null;uniqueIndex"`
 	SourceType      NewsSource `json:"source_type" gorm:"not null"`
 	IsActive        bool       `json:"is_active" gorm:"default:true"`
 	APIEndpoint     *string    `json:"api_endpoint"`

@@ -169,6 +169,34 @@ func (s *S3Service) UploadFileFromPath(localPath, s3Key string) (string, error) 
 	return url, nil
 }
 
+// GetFile retrieves a file from S3 and returns its content
+func (s *S3Service) GetFile(s3Key string) ([]byte, string, error) {
+	// Get object from S3
+	result, err := s.client.GetObject(context.Background(), &s3.GetObjectInput{
+		Bucket: aws.String(s.bucketName),
+		Key:    aws.String(s3Key),
+	})
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to get file from S3: %v", err)
+	}
+	defer result.Body.Close()
+
+	// Read file content
+	fileContent, err := io.ReadAll(result.Body)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to read file content: %v", err)
+	}
+
+	// Get content type from result
+	contentType := ""
+	if result.ContentType != nil {
+		contentType = *result.ContentType
+	}
+
+	log.Printf("Successfully retrieved file from S3: %s (Content-Type: %s, Size: %d bytes)", s3Key, contentType, len(fileContent))
+	return fileContent, contentType, nil
+}
+
 // DeleteFile deletes a file from S3
 func (s *S3Service) DeleteFile(s3Key string) error {
 	_, err := s.client.DeleteObject(context.Background(), &s3.DeleteObjectInput{

@@ -23,6 +23,9 @@ func SetupUploadRoutes(r *gin.Engine) {
 		upload.DELETE("/file/:filename", uploadHandler.DeleteFile)
 	}
 
+	// Public download route (no authentication required)
+	r.GET("/api/files/download", uploadHandler.DownloadFile) // GET /api/files/download?key=path/to/file&action=view|download
+
 	// Note: Public file serving is handled by r.Static("/uploads", "./uploads") in main.go
 	// Removing the conflicting route to avoid panic
 }

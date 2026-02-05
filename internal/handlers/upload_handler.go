@@ -4,11 +4,14 @@ import (
 "fmt"
 "io"
 "net/http"
+"net/url"
 "os"
 "path/filepath"
 "strconv"
 "strings"
 "time"
+
+"gcx-cms/internal/services"
 
 "github.com/gin-gonic/gin"
 )
@@ -160,6 +163,65 @@ func (h *UploadHandler) DeleteFile(c *gin.Context) {
 		"success": true,
 		"message": "File deleted successfully",
 	})
+}
+
+// DownloadFile streams a file from S3
+func (h *UploadHandler) DownloadFile(c *gin.Context) {
+	// Get the file key from query parameter (URL encoded)
+	fileKey := c.Query("key")
+	if fileKey == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "File key is required",
+		})
+		return
+	}
+
+	// Decode URL-encoded filename
+	decodedKey, err := url.QueryUnescape(fileKey)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "Invalid file key",
+		})
+		return
+	}
+
+	// Initialize S3 service
+	s3Service, err := services.NewS3Service()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "S3 service not available",
+		})
+		return
+	}
+
+	// Get file from S3
+	fileContent, contentType, err := s3Service.GetFile(decodedKey)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"error":   "File not found",
+		})
+		return
+	}
+
+	// Extract filename from key
+	filename := filepath.Base(decodedKey)
+
+	// Set headers based on whether user wants to download or view
+	action := c.DefaultQuery("action", "download")
+	if action == "view" {
+		// Display inline (browser will display if it can)
+		c.Header("Content-Disposition", "inline; filename="+filename)
+	} else {
+		// Force download
+		c.Header("Content-Disposition", "attachment; filename="+filename)
+	}
+
+	c.Header("Content-Type", contentType)
+	c.Data(http.StatusOK, contentType, fileContent)
 }
 
 // sanitizeFilename removes unsafe characters from filename

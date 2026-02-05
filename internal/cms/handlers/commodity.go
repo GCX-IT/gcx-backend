@@ -207,23 +207,26 @@ func GetContractFilePresignedURL(c *gin.Context) {
 
 	// Convert local path to S3 key if needed
 	s3Key := commodity.ContractFile
+	filename := "contract.pdf"
+	
 	if commodity.ContractFile[0] == '/' {
 		// Convert /uploads/contracts/filename.pdf to contracts/filename.pdf
 		s3Key = "contracts/" + commodity.ContractFile[len("/uploads/contracts/"):]
+		filename = commodity.ContractFile[len("/uploads/contracts/"):]
 	}
 
-	// Generate presigned URL (valid for 24 hours)
-	presignedURL, err := s3Service.GetPresignedURL(s3Key, 24*60)
+	// Get file content from S3
+	fileContent, contentType, err := s3Service.GetFile(s3Key)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"error":   "Failed to generate presigned URL",
+			"error":   "Failed to retrieve contract file",
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"url":     presignedURL,
-	})
+	// Set headers for file download/display
+	c.Header("Content-Disposition", "inline; filename="+filename)
+	c.Header("Content-Type", contentType)
+	c.Data(http.StatusOK, contentType, fileContent)
 }

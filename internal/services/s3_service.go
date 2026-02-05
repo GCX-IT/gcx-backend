@@ -238,7 +238,7 @@ func (s *S3Service) GetPresignedURL(s3Key string, expirationMinutes int) (string
 	}
 
 	// Create a presigner from the client
-	presigner := s3.NewPresignFromClient(s.client)
+	presigner := s3.NewPresignClient(s.client)
 
 	// Generate presigned GET URL
 	presignedRequest, err := presigner.PresignGetObject(

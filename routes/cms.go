@@ -62,10 +62,11 @@ func SetupCMSRoutes(r *gin.Engine) {
 
 		// Public commodities (for website)
 		cms.GET("/commodities", handlers.GetCommodities)   // GET /api/commodities (list all commodities)
+		
+		// Contract file presigned URL (for website) - must be before :id
+		cms.GET("/commodities/contract-url", handlers.GetContractFilePresignedURL) // GET /api/commodities/contract-url
+		
 		cms.GET("/commodities/:id", handlers.GetCommodity) // GET /api/commodities/{id}
-
-		// Contract file presigned URL (for website)
-		cms.GET("/commodities/:commodityId/contract-url", handlers.GetContractFilePresignedURL) // GET /api/commodities/{commodityId}/contract-url
 
 		// Public commodities with contract types (for website)
 		cms.GET("/commodities-with-contract-types", handlers.GetCommoditiesWithContractTypes) // GET /api/commodities-with-contract-types

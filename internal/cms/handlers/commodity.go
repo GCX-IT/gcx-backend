@@ -6,6 +6,7 @@ import (
 
 	"gcx-cms/internal/cms/models"
 	"gcx-cms/internal/shared/database"
+	"gcx-cms/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -167,5 +168,62 @@ func DeleteCommodity(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Commodity deleted successfully",
+	})
+}
+
+// GetContractFilePresignedURL generates a presigned URL for a contract file
+func GetContractFilePresignedURL(c *gin.Context) {
+	commodityID := c.Param("commodityId")
+	db := database.GetDB()
+
+	// Get the commodity
+	var commodity models.Commodity
+	if err := db.First(&commodity, commodityID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"error":   "Commodity not found",
+		})
+		return
+	}
+
+	// Check if contract file exists
+	if commodity.ContractFile == "" {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"error":   "No contract file found for this commodity",
+		})
+		return
+	}
+
+	// Initialize S3 service
+	s3Service, err := services.NewS3Service()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "S3 service not available",
+		})
+		return
+	}
+
+	// Convert local path to S3 key if needed
+	s3Key := commodity.ContractFile
+	if commodity.ContractFile[0] == '/' {
+		// Convert /uploads/contracts/filename.pdf to contracts/filename.pdf
+		s3Key = "contracts/" + commodity.ContractFile[len("/uploads/contracts/"):]
+	}
+
+	// Generate presigned URL (valid for 24 hours)
+	presignedURL, err := s3Service.GetPresignedURL(s3Key, 24*60)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Failed to generate presigned URL",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"url":     presignedURL,
 	})
 }

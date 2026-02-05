@@ -203,6 +203,33 @@ func (s *S3Service) GetFileURL(s3Key string) string {
 	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", s.bucketName, s.region, s3Key)
 }
 
+// GetPresignedURL generates a presigned URL for a file with configurable expiration
+func (s *S3Service) GetPresignedURL(s3Key string, expirationMinutes int) (string, error) {
+	if expirationMinutes <= 0 {
+		expirationMinutes = 60 // Default to 1 hour
+	}
+
+	// Create a presigner from the client
+	presigner := s3.NewPresignFromClient(s.client)
+
+	// Generate presigned GET URL
+	presignedRequest, err := presigner.PresignGetObject(
+		context.Background(),
+		&s3.GetObjectInput{
+			Bucket: aws.String(s.bucketName),
+			Key:    aws.String(s3Key),
+		},
+		s3.WithPresignExpires(time.Duration(expirationMinutes)*time.Minute),
+	)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to generate presigned URL: %v", err)
+	}
+
+	log.Printf("Generated presigned URL for %s (expires in %d minutes)", s3Key, expirationMinutes)
+	return presignedRequest.URL, nil
+}
+
 // Helper function to get content type based on file extension
 func getContentType(filename string) string {
 	ext := strings.ToLower(filepath.Ext(filename))

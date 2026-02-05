@@ -213,9 +213,28 @@ func (h *UploadHandler) DownloadFile(c *gin.Context) {
 			// Successfully read local file
 			filename = filepath.Base(localPath)
 			contentType = getContentType(filename)
+			log.Printf("Found file locally: %s", localPath)
 		} else {
 			// Local file not found, try S3
 			fileContent = nil
+			log.Printf("Local file not found: %s", localPath)
+		}
+	} else if strings.Contains(decodedKey, "amazonaws.com/") {
+		// S3 URL - extract filename and try to find it locally first
+		parts := strings.Split(decodedKey, "/")
+		filename = parts[len(parts)-1] // Get last part (filename)
+		
+		// Try to find it in local uploads/uploads/contracts directory
+		localPath = "./uploads/uploads/contracts/" + filename
+		fileContent, err = os.ReadFile(localPath)
+		if err == nil {
+			// Found it locally!
+			contentType = getContentType(filename)
+			log.Printf("Found S3 file locally: %s", localPath)
+		} else {
+			// Not found locally, will try S3
+			fileContent = nil
+			log.Printf("File not found locally, will try S3: %s", localPath)
 		}
 	}
 

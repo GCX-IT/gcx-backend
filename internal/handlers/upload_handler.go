@@ -165,7 +165,7 @@ func (h *UploadHandler) DeleteFile(c *gin.Context) {
 	})
 }
 
-// DownloadFile streams a file from S3
+// DownloadFile streams a file from S3 or local filesystem
 func (h *UploadHandler) DownloadFile(c *gin.Context) {
 	// Get the file key from query parameter (URL encoded)
 	fileKey := c.Query("key")
@@ -187,50 +187,79 @@ func (h *UploadHandler) DownloadFile(c *gin.Context) {
 		return
 	}
 
-	// Extract S3 key from full URL if needed
-	// URLs look like: https://gcxwebsite.s3.eu-north-1.amazonaws.com/cms/filename.jpg
-	// We need just: cms/filename.jpg
-	s3Key := decodedKey
-	if strings.Contains(decodedKey, "amazonaws.com/") {
-		// Extract key after domain
-		parts := strings.Split(decodedKey, "amazonaws.com/")
-		if len(parts) == 2 {
-			s3Key = parts[1]
+	// Check if it's a local path first
+	var fileContent []byte
+	var contentType string
+	var filename string
+	var localPath string
+
+	if strings.HasPrefix(decodedKey, "/uploads/") {
+		// Local file path - try to serve from filesystem
+		// First try: ./uploads/uploads/contracts/... (nested path)
+		localPath = "." + decodedKey
+		fileContent, err = os.ReadFile(localPath)
+		
+		// If not found, try alternative path with double /uploads
+		if err != nil {
+			localPath = "./uploads" + decodedKey
+			fileContent, err = os.ReadFile(localPath)
+		}
+		
+		if err == nil {
+			// Successfully read local file
+			filename = filepath.Base(localPath)
+			contentType = getContentType(filename)
 		} else {
-			c.JSON(http.StatusBadRequest, gin.H{
+			// Local file not found, try S3
+			fileContent = nil
+		}
+	}
+
+	// If local file not found, try S3
+	if fileContent == nil {
+		s3Key := decodedKey
+		if strings.Contains(decodedKey, "amazonaws.com/") {
+			// Extract key after domain
+			parts := strings.Split(decodedKey, "amazonaws.com/")
+			if len(parts) == 2 {
+				s3Key = parts[1]
+			} else {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"success": false,
+					"error":   "Invalid S3 URL format",
+				})
+				return
+			}
+		} else if strings.HasPrefix(decodedKey, "/uploads/") {
+			// Convert local path to S3 key
+			// /uploads/contracts/filename.pdf -> contracts/filename.pdf
+			filename = filepath.Base(decodedKey)
+			s3Key = "contracts/" + filename
+		}
+
+		// Initialize S3 service
+		s3Service, err := services.NewS3Service()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
 				"success": false,
-				"error":   "Invalid S3 URL format",
+				"error":   "S3 service not available",
 			})
 			return
 		}
-	} else if strings.HasPrefix(decodedKey, "/uploads/") {
-		// Convert local path to S3 key
-		// /uploads/contracts/filename.pdf -> contracts/filename.pdf
-		s3Key = "contracts/" + decodedKey[len("/uploads/contracts/"):]
-	}
 
-	// Initialize S3 service
-	s3Service, err := services.NewS3Service()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"error":   "S3 service not available",
-		})
-		return
-	}
+		// Get file from S3
+		fileContent, contentType, err = s3Service.GetFile(s3Key)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"error":   "Failed to retrieve file: " + err.Error(),
+			})
+			return
+		}
 
-	// Get file from S3
-	fileContent, contentType, err := s3Service.GetFile(s3Key)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"error":   "Failed to retrieve file: " + err.Error(),
-		})
-		return
+		// Extract filename from key
+		filename = filepath.Base(s3Key)
 	}
-
-	// Extract filename from key
-	filename := filepath.Base(s3Key)
 
 	// Set headers based on whether user wants to download or view
 	action := c.DefaultQuery("action", "download")
@@ -244,6 +273,29 @@ func (h *UploadHandler) DownloadFile(c *gin.Context) {
 
 	c.Header("Content-Type", contentType)
 	c.Data(http.StatusOK, contentType, fileContent)
+}
+
+// getContentType returns the appropriate content type for a file
+func getContentType(filename string) string {
+	ext := strings.ToLower(filepath.Ext(filename))
+	switch ext {
+	case ".pdf":
+		return "application/pdf"
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".png":
+		return "image/png"
+	case ".gif":
+		return "image/gif"
+	case ".txt":
+		return "text/plain"
+	case ".csv":
+		return "text/csv"
+	case ".zip":
+		return "application/zip"
+	default:
+		return "application/octet-stream"
+	}
 }
 
 // sanitizeFilename removes unsafe characters from filename

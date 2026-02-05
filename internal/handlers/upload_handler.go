@@ -187,6 +187,28 @@ func (h *UploadHandler) DownloadFile(c *gin.Context) {
 		return
 	}
 
+	// Extract S3 key from full URL if needed
+	// URLs look like: https://gcxwebsite.s3.eu-north-1.amazonaws.com/cms/filename.jpg
+	// We need just: cms/filename.jpg
+	s3Key := decodedKey
+	if strings.Contains(decodedKey, "amazonaws.com/") {
+		// Extract key after domain
+		parts := strings.Split(decodedKey, "amazonaws.com/")
+		if len(parts) == 2 {
+			s3Key = parts[1]
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"error":   "Invalid S3 URL format",
+			})
+			return
+		}
+	} else if strings.HasPrefix(decodedKey, "/uploads/") {
+		// Convert local path to S3 key
+		// /uploads/contracts/filename.pdf -> contracts/filename.pdf
+		s3Key = "contracts/" + decodedKey[len("/uploads/contracts/"):]
+	}
+
 	// Initialize S3 service
 	s3Service, err := services.NewS3Service()
 	if err != nil {
@@ -198,17 +220,17 @@ func (h *UploadHandler) DownloadFile(c *gin.Context) {
 	}
 
 	// Get file from S3
-	fileContent, contentType, err := s3Service.GetFile(decodedKey)
+	fileContent, contentType, err := s3Service.GetFile(s3Key)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"error":   "File not found",
+			"error":   "Failed to retrieve file: " + err.Error(),
 		})
 		return
 	}
 
 	// Extract filename from key
-	filename := filepath.Base(decodedKey)
+	filename := filepath.Base(s3Key)
 
 	// Set headers based on whether user wants to download or view
 	action := c.DefaultQuery("action", "download")

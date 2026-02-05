@@ -187,6 +187,9 @@ func (h *UploadHandler) DownloadFile(c *gin.Context) {
 		return
 	}
 
+	// Log the request for debugging
+	log.Printf("DownloadFile request: %s", decodedKey)
+
 	// Check if it's a local path first
 	var fileContent []byte
 	var contentType string

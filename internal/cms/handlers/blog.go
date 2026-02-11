@@ -123,6 +123,7 @@ func CreatePost(c *gin.Context) {
 		FeaturedImage *string  `json:"featured_image"`
 		Tags          []string `json:"tags"`
 		Status        string   `json:"status"`
+		PublishedAt   *string  `json:"published_at"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -181,7 +182,14 @@ func CreatePost(c *gin.Context) {
 		}
 	}
 
-	if status == models.StatusPublished {
+	// Handle custom published_at (for backdating or scheduling)
+	if req.PublishedAt != nil && *req.PublishedAt != "" {
+		publishedTime, err := time.Parse(time.RFC3339, *req.PublishedAt)
+		if err == nil {
+			post.PublishedAt = &publishedTime
+		}
+	} else if status == models.StatusPublished {
+		// Only auto-set publish time if no custom date was provided
 		post.Publish()
 	}
 
@@ -239,6 +247,7 @@ func UpdatePost(c *gin.Context) {
 		Tags          []string `json:"tags"`
 		Status        string   `json:"status"`
 		Slug          string   `json:"slug"`
+		PublishedAt   *string  `json:"published_at"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -283,11 +292,25 @@ func UpdatePost(c *gin.Context) {
 		}
 	}
 
+	// Handle published_at update (for backdating or scheduling)
+	if req.PublishedAt != nil && *req.PublishedAt != "" {
+		publishedTime, err := time.Parse(time.RFC3339, *req.PublishedAt)
+		if err == nil {
+			post.PublishedAt = &publishedTime
+		}
+	}
+
 	// Handle status update
 	if req.Status != "" {
 		switch req.Status {
 		case string(models.StatusPublished):
-			post.Publish()
+			// If no custom published_at was set, use Publish() which sets it to now
+			if req.PublishedAt == nil || *req.PublishedAt == "" {
+				post.Publish()
+			} else {
+				// Just set the status, keep the custom published_at
+				post.Status = models.StatusPublished
+			}
 		case string(models.StatusDraft):
 			post.Unpublish()
 		case string(models.StatusPrivate):

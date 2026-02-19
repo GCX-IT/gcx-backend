@@ -27,6 +27,12 @@ func CreateRTIRequest(c *gin.Context) {
 		return
 	}
 
+	// Reload the request to ensure all fields are populated (including auto-generated ones)
+	if err := db.First(&request, request.ID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve created RTI request"})
+		return
+	}
+
 	// TODO: Send confirmation email to requester
 
 	c.JSON(http.StatusCreated, gin.H{

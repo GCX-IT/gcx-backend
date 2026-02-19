@@ -32,12 +32,13 @@ type RTIRequest struct {
 	FullName        string         `json:"full_name" gorm:"not null"`
 	Email           string         `json:"email" gorm:"not null"`
 	Phone           string         `json:"phone" gorm:"not null"`
-	Address         *string        `json:"address"`
+	IDNumber        string         `json:"id_number" gorm:"type:varchar(50);not null"`
+	Address         string         `json:"address" gorm:"not null"`
 	Organization    *string        `json:"organization"`
 	RequestType     string         `json:"request_type" gorm:"not null"`
 	Subject         string         `json:"subject" gorm:"not null"`
 	Description     string         `json:"description" gorm:"type:longtext;not null"`
-	PreferredFormat string         `json:"preferred_format" gorm:"default:'Electronic'"`
+	PreferredFormat string         `json:"preferred_format" gorm:"type:varchar(50);not null;default:'electronic'"`
 	Status          RTIStatus      `json:"status" gorm:"default:'pending'"`
 	Priority        RTIPriority    `json:"priority" gorm:"default:'normal'"`
 	AssignedTo      *string        `json:"assigned_to"`

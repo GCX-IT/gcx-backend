@@ -13,14 +13,14 @@ type TVConfig struct {
 	ID                 uint           `json:"-" gorm:"primaryKey"`
 	NowPlaying         *string        `json:"nowPlaying"`
 	NowPlayingId       *string        `json:"nowPlayingId"`
-	AutoNext           bool           `json:"autoNext" gorm:"default:true"`
-	Loop               bool           `json:"loop" gorm:"default:true"`
-	Playlist           datatypes.JSON `json:"playlist" gorm:"type:json;default:'[]'"`
-	Images             datatypes.JSON `json:"images" gorm:"type:json;default:'[]'"`
-	VideoDuration      int            `json:"videoDuration" gorm:"default:60"`
-	MarketDataDuration int            `json:"marketDataDuration" gorm:"default:10"`
-	ImageDuration      int            `json:"imageDuration" gorm:"default:120"`
-	EnableRotation     bool           `json:"enableRotation" gorm:"default:false"`
+	AutoNext           bool           `json:"autoNext"`
+	Loop               bool           `json:"loop"`
+	Playlist           datatypes.JSON `json:"playlist" gorm:"type:json"`
+	Images             datatypes.JSON `json:"images" gorm:"type:json"`
+	VideoDuration      int            `json:"videoDuration"`
+	MarketDataDuration int            `json:"marketDataDuration"`
+	ImageDuration      int            `json:"imageDuration"`
+	EnableRotation     bool           `json:"enableRotation"`
 	CreatedAt          time.Time      `json:"-"`
 	UpdatedAt          time.Time      `json:"-"`
 	DeletedAt          gorm.DeletedAt `json:"-" gorm:"index"`

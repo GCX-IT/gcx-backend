@@ -10,6 +10,7 @@ import (
 	marketdata_models "gcx-cms/internal/marketdata/models"
 	"gcx-cms/internal/models"
 	shared_models "gcx-cms/internal/shared/models"
+	tv_models "gcx-cms/internal/tv/models"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -82,26 +83,14 @@ func InitDB() {
 
 	log.Printf("✅ Connected to %s database", dbType)
 
-	// Check if database is already migrated (faster than AutoMigrate)
-	if !isDatabaseMigrated() {
-		log.Println("Database not migrated, running AutoMigrate...")
-		if err := AutoMigrate(); err != nil {
-			log.Fatal("Failed to migrate database:", err)
-		}
-	} else {
-		log.Println("Database already migrated, skipping AutoMigrate")
+	// Run AutoMigrate for new tables; existing tables are altered only if columns changed.
+	log.Println("Running AutoMigrate...")
+	if err := AutoMigrate(); err != nil {
+		log.Fatal("Failed to migrate database:", err)
 	}
 
 	// Create default admin user
 	CreateDefaultAdmin()
-}
-
-// isDatabaseMigrated checks if key tables exist (faster than AutoMigrate)
-func isDatabaseMigrated() bool {
-	// Check if a few key tables exist
-	var count int64
-	DB.Raw("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name IN ('users', 'settings', 'pages')").Scan(&count)
-	return count >= 3
 }
 
 // AutoMigrate runs database migrations
@@ -141,6 +130,9 @@ func AutoMigrate() error {
 		&marketdata_models.UserSubscription{},
 		&marketdata_models.SubscriptionFeature{},
 		&marketdata_models.UserDataAccess{},
+
+		// GCX TV
+		&tv_models.TVConfig{},
 	)
 }
 

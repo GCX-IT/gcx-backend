@@ -11,6 +11,7 @@ func SetupAllRoutes(r *gin.Engine) {
 	SetupCMSRoutes(r)
 	SetupMarketDataRoutes(r)
 	SetupUploadRoutes(r)
+	SetupTVRoutes(r)
 
 	// Health check
 	r.GET("/health", func(c *gin.Context) {

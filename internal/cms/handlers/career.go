@@ -103,7 +103,7 @@ func CreateCareer(c *gin.Context) {
 
 	// Validate required fields
 	errorMessages := []string{}
-	
+
 	if career.Title == "" {
 		errorMessages = append(errorMessages, "Title is required")
 	}

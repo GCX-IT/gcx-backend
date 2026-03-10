@@ -168,7 +168,7 @@ func UpdateCareer(c *gin.Context) {
 	if err := db.Model(&career).Updates(updateData).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"error":   "Failed to update career",
+			"error":   "Failed to update career: " + err.Error(),
 		})
 		return
 	}

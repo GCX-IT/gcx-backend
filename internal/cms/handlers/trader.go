@@ -84,7 +84,7 @@ func CreateTrader(c *gin.Context) {
 	if err := c.ShouldBindJSON(&trader); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"error":   "Invalid trader data",
+			"error":   "Invalid trader data: " + err.Error(),
 		})
 		return
 	}
@@ -92,7 +92,7 @@ func CreateTrader(c *gin.Context) {
 	if err := db.Create(&trader).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"error":   "Failed to create trader",
+			"error":   "Failed to create trader: " + err.Error(),
 		})
 		return
 	}

@@ -96,7 +96,32 @@ func CreateCareer(c *gin.Context) {
 	if err := c.ShouldBindJSON(&career); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"error":   "Invalid career data",
+			"error":   "Invalid career data: " + err.Error(),
+		})
+		return
+	}
+
+	// Validate required fields
+	errorMessages := []string{}
+	
+	if career.Title == "" {
+		errorMessages = append(errorMessages, "Title is required")
+	}
+	if career.Category == "" {
+		errorMessages = append(errorMessages, "Category is required")
+	}
+	if career.EmploymentType == "" {
+		errorMessages = append(errorMessages, "Employment Type is required (Full-time, Part-time, Contract, Internship)")
+	}
+	if career.ExperienceLevel == "" {
+		errorMessages = append(errorMessages, "Experience Level is required (Entry Level, Mid Level, Senior Level, Executive)")
+	}
+
+	if len(errorMessages) > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "Missing required fields",
+			"details": errorMessages,
 		})
 		return
 	}
@@ -134,7 +159,7 @@ func UpdateCareer(c *gin.Context) {
 	if err := c.ShouldBindJSON(&updateData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"error":   "Invalid career data",
+			"error":   "Invalid career data: " + err.Error(),
 		})
 		return
 	}

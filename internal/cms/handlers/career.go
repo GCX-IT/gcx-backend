@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"gcx-cms/internal/cms/models"
 	"gcx-cms/internal/shared/database"
@@ -164,6 +167,22 @@ func UpdateCareer(c *gin.Context) {
 		return
 	}
 
+	// Normalize DATE columns (MySQL DATE doesn't accept RFC3339 like 2026-03-17T00:00:00.000Z)
+	if err := normalizeDateUpdateField(updateData, "application_deadline"); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+	if err := normalizeDateUpdateField(updateData, "start_date"); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	// Update the career with the new data
 	if err := db.Model(&career).Updates(updateData).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -186,6 +205,52 @@ func UpdateCareer(c *gin.Context) {
 		"success": true,
 		"data":    career,
 	})
+}
+
+func normalizeDateUpdateField(updateData map[string]interface{}, field string) error {
+	value, ok := updateData[field]
+	if !ok {
+		return nil
+	}
+
+	if value == nil {
+		return nil
+	}
+
+	valueStr, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("Invalid %s: expected a string date", field)
+	}
+
+	valueStr = strings.TrimSpace(valueStr)
+	if valueStr == "" {
+		updateData[field] = nil
+		return nil
+	}
+
+	parsed, err := parseDateLike(valueStr)
+	if err != nil {
+		return fmt.Errorf("Invalid %s: %w", field, err)
+	}
+
+	updateData[field] = parsed.Format("2006-01-02")
+	return nil
+}
+
+func parseDateLike(value string) (time.Time, error) {
+	// Preferred formats first
+	if t, err := time.Parse("2006-01-02", value); err == nil {
+		return t, nil
+	}
+	if t, err := time.Parse(time.RFC3339Nano, value); err == nil {
+		return t, nil
+	}
+	// Common UI form date format
+	if t, err := time.Parse("01/02/2006", value); err == nil {
+		return t, nil
+	}
+
+	return time.Time{}, fmt.Errorf("unsupported date format: %q", value)
 }
 
 // DeleteCareer deletes a career
